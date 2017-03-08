@@ -18,7 +18,7 @@ Add the following lines to smarthome/etc/plugin.conf:
 
 <pre>
 [helios]
-    class_name = helios
+    class_name = Helios
     class_path = plugins.helios
     tty = /dev/ttyUSB0    # put your serial port here (usually /dev/ttyUSB0 or /dev/ttyAMA0)
     cycle = 60            # update interval in seconds; ex-default: 300
