@@ -68,8 +68,6 @@ CONST_MAP_VARIABLES_TO_ID = {
         "boost_mode"      : {"varid" : 0xAA, 'type': 'bit',          'bitposition':  5, 'read': True, 'write': True  },
         "boost_on"        : {"varid" : 0x71, 'type': 'bit',          'bitposition':  5, 'read': True, 'write': True  },
         "boost_status"    : {"varid" : 0x71, 'type': 'bit',          'bitposition':  6, 'read': True, 'write': False },
-        "boost_on"        : {"varid" : 0x71, 'type': 'bit',          'bitposition':  5, 'read': True, 'write': True  },
-        "boost_status"    : {"varid" : 0x71, 'type': 'bit',          'bitposition':  6, 'read': True, 'write': False },
         "boost_remaining" : {"varid" : 0x79, 'type': 'dec',          'bitposition': -1, 'read': True, 'write': False },
         "fan_in_on_off"   : {"varid" : 0x08, 'type': 'bit',          'bitposition':  3, 'read': True, 'write': True  },
         "fan_in_percent"  : {"varid" : 0xB0, 'type': 'dec',          'bitposition': -1, 'read': True, 'write': True  },        
@@ -98,7 +96,7 @@ class HeliosException(Exception):
 
 class HeliosBase(SmartPlugin):
 
-    PLUGIN_VERSION = "1.1.1"
+    PLUGIN_VERSION = "1.4.2"
     ALLOW_MULTIINSTANCE = False
 
     def __init__(self, tty='/dev/ttyUSB0'):
