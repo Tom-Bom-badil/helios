@@ -44,7 +44,7 @@ Troubleshooting options on github (see above).
 
 Get the Visu widget running
 ---------------------------
-Copy all files from sv_widgets to smartVISU/widgets. Then add following 2 lines to your HTML:
+Copy the files from sv_widgets to smartVISU/widgets and smartVISU/pics/helios (create this directory first). Then add following 2 lines to your HTML:
 
 <pre>
 {% import "helios.html" as helios %}
