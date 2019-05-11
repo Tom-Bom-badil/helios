@@ -10,8 +10,8 @@ Plugin installation in short:
 All files go to smarthome/plugins/helios. Then do the following:
 
 <pre>
-files/helios.conf         copy file to smarthome/items/helios.conf
-files/helios_logics.py    copy file to smarthome/logics/helios.conf
+files/helios.yaml         copy file to smarthome/items/helios.yaml
+files/helios_logics.py    copy file to smarthome/logics/helios_logics.py
 </pre>
 
 Add the following lines to smarthome/etc/plugin.conf:
@@ -24,21 +24,21 @@ Add the following lines to smarthome/etc/plugin.conf:
     cycle = 60            # update interval in seconds; ex-default: 300
 </pre>
 
-Add the following lines to smarthome/etc/logic.conf:
+Add the following lines to smarthome/etc/logic.yaml:
 
 <pre>
-[fanspeed_uzsu_logic]
+fanspeed_uzsu_logic:
     filename = helios_logics.py
-    watch_item = ventilation.fanspeed.fanspeed_uzsu
+    watch_item: ventilation.fanspeed.fanspeed_uzsu
 
-[booster_logic]
+booster_logic:
     filename = helios_logics.py 
     watch_item = ventilation.booster_mode.logics.switch 
 </pre>
 
-At next you should update the settings in the first section of smarthome/items/helios.conf in order to get correct values.
+At next you should update the settings in the first section of smarthome/items/helios.conf in order to get correct values for your house and specific controlled air unit.
 
-Restart, plugin should be running by now (check items in backend plugin).
+Restart smarthomeNG, the plugin should be running by now (check items in backend plugin).
 
 Troubleshooting options on github (see above).
 
