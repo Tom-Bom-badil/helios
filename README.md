@@ -14,10 +14,10 @@ files/helios.yaml         copy file to smarthome/items/helios.yaml
 files/helios_logics.py    copy file to smarthome/logics/helios_logics.py
 </pre>
 
-Add the following lines to smarthome/etc/plugin.conf:
+Add the following lines to smarthome/etc/plugin.yaml:
 
 <pre>
-[helios]
+helios:
     class_name = Helios
     class_path = plugins.helios
     tty = /dev/ttyUSB0    # put your serial port here (usually /dev/ttyUSB0 or /dev/ttyAMA0)
