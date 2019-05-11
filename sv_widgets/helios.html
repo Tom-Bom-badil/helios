@@ -32,63 +32,76 @@
 
 {% macro show_widget(id, use_uzsu, title) %} /** ---------- The main widget -------------------- **/
 
+
     /** Preparations **/
-    {% import "basic.html" as basic %}                                           /** some basics **/
+    {% import "basic.html" as basic %}                                          /** some widgets **/
     {% import "device.html" as device %}                                    /** new 2.9 for UZSU **/
     /** {% if use_uzsu %} {% import "widget_uzsu.html" as uzsu %} {% endif %}      obsolete 2.9  **/
     {% set uid = uid(page, id) %}
     
-    {% set debug_mode = true %}                                /** additional output (debugging) **/
-    {% set documentation_mode = true %}                                 /** for screenshots only **/    
+    {% set debug_mode = false %}                               /** additional output (debugging) **/
+    {% set documentation_mode = false %}                                /** for screenshots only **/    
     {% set helios_base_dir = 'widgets' %}                          /** directory of self and css **/
     {% set helios_pic_dir  = 'pics/helios' %}                          /** directory of own pics **/
     {% set boost_mode = '1' %}                  /** 1=Helios, 2=Logic fixed, 3=Logic interactive **/
     
     /** Your own strings, translations and outputs, as you deem necessary: **/
-    {% set level_popup_title =     'Lüftungsstufe einstellen  - aktuell: ' %}
-    {% set uzsu_popup_title =      'Schaltuhr' %}
-    {% set booster_popup_title =   'Stoßlüftung' %}
-    {% set info_popup_title =      'Allgemeiner Status' %}
-    {% set settings_popup_title =  'Einstellungen' %}
-    {% set error_popup_title =     'KWL-Alarm!' %}
-    {% set uzsu_tester_title =     '[Vent][[Fan]][[[FanUZSU]]]-->' %}
+    {% set level_popup_title =     			'Lüftungsstufe einstellen' %}
+    {% set uzsu_popup_title =      			'Schaltuhr' %}
+    {% set booster_popup_title =   			'Stoßlüftung' %}
+    {% set info_popup_title =      			'Allgemeiner Status' %}
+    {% set settings_popup_title =  			'Einstellungen' %}
+    {% set error_popup_title =     			'KWL-Alarm!' %}
+    {% set uzsu_tester_title =     			'[Vent][[Fan]][[[FanUZSU]]]-->' %}
     
     /** Items for the DIN Info Tab **/
     {% set info_DIN_items = {
-        'Feuchteschutz:':                   'moisture_protection',
-        'Reduzierte Lüftung:':             'reduced_air_exchange',
-        'Nennlüftung:':                        'normal_air_exchange',
-        'Intensivlüftung:':                    'boost_air_exchange'
+        'Feuchteschutz:':      				'moisture_protection',
+        'Reduzierte Lüftung:': 				'reduced_air_exchange',
+        'Nennlüftung:':        				'normal_air_exchange',
+        'Intensivlüftung:':    				'boost_air_exchange'
     } %}
     
     /** Old sample: Items for the Info Popup
     Definition:
     {% set info_popup_items = {
-        'Lüfterstufe<sub>min</sub>':       'min_fanspeed',
-        'Lüfterstufe<sub>max</sub>':       'max_fanspeed',
-        'WRGΔ':                                'bypass_temp',
+        'Lüfterstufe<sub>min</sub>':        'min_fanspeed',
+        'Lüfterstufe<sub>max</sub>':        'max_fanspeed',
+        'WRGΔ':                             'bypass_temp',
         'Filterreinigung in':               'clean_filter',
         'Letzter Fehler':                   'device_error',
         'Zuluftventilator (?)':             'fan_in_on_off',
         'Zuluftmotor %':                    'fan_in_percent',
         'Abluftventilator (?)':             'fan_out_on_off',
         'Abluftmotor %':                    'fan_out_percent',
-        'Stoß-/Kaminlüftung':             'booster.built_in.mode',
+        'Stoß-/Kaminlüftung':               'booster.built_in.mode',
         'Luftdurchsatz':                    'airflow',
         'Luftaustauschrate':                'air_exchange_rate',
-        'Wärmeverlust (W)':                    'energy_loss',
-        'Wärmegewinn (W)':                 'energy_saving',
-        'Wirkungsgrad ƞ<sub>therm</sub>':  'efficiency',
+        'Wärmeverlust (W)':                 'energy_loss',
+        'Wärmegewinn (W)':                  'energy_saving',
+        'Wirkungsgrad ƞ<sub>therm</sub>':   'efficiency',
         'Stromverbrauch Ventilatoren':      'consumption_ventilators'
     } %}
     How to use it:
     {% autoescape false %}  
         {% for title,item in info_popup_items %}
-            <span class="helios_infotable">{{ title }}<span style="float:right;">{{ basic.value(id~'_info_'~item, 'ventilation.'~item ) }}</span></span>
+            <span class="helios_infotable">{{ title }}<span style="float:right;">{{ basic.print(id~'_info_'~item, 'ventilation.'~item ) }}</span></span>
         {% endfor %}
     {% endautoescape %}
     **/
     
+    {% set target_sv_version = '2.09' %}
+    {% set current_sv_version = config_version %}
+    /** Testausgabe config-version:|{{config_version}}| **/
+    {% if current_sv_version|length == 3 %}
+        {% set current_sv_version = current_sv_version|replace({'.':'.0'}) %}
+    {% endif %}
+    {% if current_sv_version < target_sv_version %}
+        <script type="text/javascript">console.error("The Helios/Vallox module requires at least smartVISU {{ target_sv_version }}!")</script>
+    {% else %}
+        /** macro / widget / code **/
+    {% endif %} 
+
 
     /** The style sheet **/
     <link type="text/css" rel="stylesheet" href="{{helios_base_dir}}/helios.css"/>
@@ -106,10 +119,10 @@
 
         
         /** Place temperatures on top the picture **/
-        <div class="helios_outside_temp"> {{ basic.float(id~'_outside_temp', 'ventilation.rs485._outside_temp', '°C') }}</div>
-        <div class="helios_inside_temp">  {{ basic.float(id~'_inside_temp',  'ventilation.rs485._inside_temp',  '°C') }}</div>
-        <div class="helios_exhaust_temp"> {{ basic.float(id~'_exhaust_temp', 'ventilation.rs485._exhaust_temp', '°C') }}</div>
-        <div class="helios_incoming_temp">{{ basic.float(id~'_incoming_temp','ventilation.rs485._incoming_temp','°C') }}</div>
+        <div class="helios_outside_temp"> {{ basic.print(id~'_outside_temp', 'ventilation.rs485._outside_temp', '°C') }}</div>
+        <div class="helios_inside_temp">  {{ basic.print(id~'_inside_temp',  'ventilation.rs485._inside_temp',  '°C') }}</div>
+        <div class="helios_exhaust_temp"> {{ basic.print(id~'_exhaust_temp', 'ventilation.rs485._exhaust_temp', '°C') }}</div>
+        <div class="helios_incoming_temp">{{ basic.print(id~'_incoming_temp','ventilation.rs485._incoming_temp','°C') }}</div>
 
         
         /** Place the level icon that triggers popup for level change (simulate a switch by using <a href>) **/
@@ -119,48 +132,359 @@
                 {% for level in 1..8 %}
                     {% set itemid = id~'_display_level_'~level %}
                     /** {% set symbol = icon0~'edit_numeric_'~level~'.svg' %} **/
-                    {% set symbol = helios_pic_dir~'/edit_numeric_'~level~'.svg' %}
+                    {% set symbol = 'edit_numeric_'~level~'.svg' %}
                     {{ basic.symbol(itemid, 'ventilation.rs485._fanspeed', '', symbol, level) }}
                 {% endfor %}
             </a>
             /** Here's the corresponding popup for switching the level **/      
-            <div id="popup_helios_level" class="helios_popup_levelswitch" data-role="popup" data-overlay-theme="c">
+            <div id="popup_helios_level" class="helios_popup_level" data-role="popup" data-transition="flip" data-overlay-theme="c">
                 <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span class="ui-btn-up-c helios_popup_header">
-                    {{ level_popup_title }} {{ basic.value(id~'_display_current_level', 'ventilation.rs485._fanspeed') }}
-                </span>
+                <span data-role="header" data-theme="c" class="helios_popup_header">{{ level_popup_title }}</span>
                 <br/>
-                /** -----------> Todo: Aktuelle Stufe farbig einfärben ------------------------- **/
-                {% for level in 1..8 %}
-                    {% set itemid = id~'_set_level_'~level %}
-                    {{ basic.button(itemid, 'ventilation.rs485._fanspeed', level, '', level, 'mini') }} &nbsp; &nbsp;
-                    {% if level == 4 %} <br/><br/> {% endif %}
-                {% endfor %}
-                
-                /** Power on/off **/
-                /** <span class="helios_power_switch ui-btn ui-btn-icon-right ui-li ui-li-has-thumb ui-btn-up-a"> **/
-                <span class="ui-btn ui-btn-icon-right ui-li ui-li-has-thumb ui-btn-up-a">
-                    {{ basic.switch(id~'_power_state', 'ventilation.rs485._power_state', helios_pic_dir~'/control_on_off_or.svg', helios_pic_dir~'/control_on_off_rt.svg') }} &nbsp; &nbsp; On / Off
-                </span>
-                
+                <div>
+                    {% for level in 1..8 %}
+                        {% set itemid = id~'_set_level_'~level %}
+                        {% set levelsymbol = 'edit_numeric_'~level~'.svg' %}
+                        /** sV 2.8: {{ basic.button(itemid, 'ventilation.rs485._fanspeed', level, '', level, 'midi') }} &nbsp; &nbsp; **/
+                        {{ basic.stateswitch(itemid, 'ventilation.rs485._fanspeed', '', [level,level], [levelsymbol,levelsymbol], '', ['orange','#fff']) }} &nbsp; &nbsp;
+                        {% if level == 4 %} </div><br/><div>{% endif %}
+                    {% endfor %}
+                </div>
             </div> 
         </div>
 
-        /** Thermal energy displaying **/       
-        <div class="helios_thermalinfo_total">{{ basic.value(id~'_thermalinfo_total', 'ventilation.thermal_efficiency.energy_total.as_text' ) }}</div>
-        <div class="helios_thermalinfo_recovered">{{ basic.value(id~'_thermalinfo_rcovered', 'ventilation.thermal_efficiency.energy_recovered.as_text' ) }}</div>
-        <div class="helios_thermalinfo_lost">{{ basic.value(id~'_thermalinfo_lost', 'ventilation.thermal_efficiency.energy_lost.as_text' ) }}</div>
+        /** Thermal energy in Watts **/
+        <div class="helios_thermalinfo_total">{{ basic.print(id~'_thermalinfo_total', 'ventilation.thermal_energy.total_outgoing.as_text' ) }}</div>
+        <div class="helios_thermalinfo_recovered">{{ basic.print(id~'_thermalinfo_rcovered', 'ventilation.thermal_energy.recovery.as_text' ) }}</div>
+        <div class="helios_thermalinfo_lost">{{ basic.print(id~'_thermalinfo_lost', 'ventilation.thermal_energy.loss.as_text' ) }}</div>
         
-<!-- alte Booster
+        /** Various indicators **/
+
+        /** Frost indicator (exhaust air fan stopped due to frost) **/
+        <div class="helios_frost_indicator">
+            <a href="#helios_frost_popup" data-rel="popup">{{ basic.symbol(id~'_frost_ind1', 'ventilation.frost_protection.is_on', '', 'temp_frost.svg', '1', '', 'rgb(205, 104, 35)') }}</a>
+        </div>
+        /** geht nicht mehr: <span class="helios_thermalinfo_defrost"><small>{{ basic.print_notzero(id~'_defrost', 'ventilation.thermal_energy.defrost', 'W') }}<br/>(erwärmen)</small></span> **/
+        /** Alternative von smai: {{ basic.print('', 'item', '', 'VAR1 > 0 ? VAR1 : ""') }} **/
+        /** Here's the corresponding popup for the info window **/
+        <div id="helios_frost_popup" class="helios_popup_frost" data-role="popup" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span id="popup_helios_frost_bar" data-role="header" data-theme="c" class="helios_popup_header"> Frostschutz </span>
+            <br/><br/>
+            Um ein Einfrieren des Wärmetauschers zu verhindern, wurde der Zuluftmotor abgeschaltet.<br/>
+            <br/>
+            
+			/**
+			Dies passiert, wenn die nach außen abgeführte Luft eine Temperatur von
+
+			[todo] °C
+            
+            unterschreitet. Die durch den Wärmetauscher nach außen geführte Luft heizt diesen nun wieder auf.
+            In dieser Zeit ist die elektrische Heizung der KWL ausgeschaltet.<br/>
+            <br/>
+            Ab einer Fortlufttemperatur von
+            
+            wird der Zuluftmotor wieder gestartet. 
+                        
+            Die genannten Temperaturen für Aus-/Einschaltung sind in den Einstellungen veränderbar.
+			**/
+			
+        </div>      
+
+        /** Heating indicator (electrical pre-heating switched on) **/
+        <div class="helios_heating_indicator">
+            <a href="#helios_heating_popup" data-rel="popup">{{ basic.symbol(id~'_heating_ind', 'ventilation.heating.is_on', '', 'sani_floor_heating.svg', 1, '', 'rgb(205, 104, 35)') }}</a>
+        </div>      
+        /** Here's the corresponding popup for the info window **/
+        <div id="helios_heating_popup" class="helios_popup_heating" data-role="popup" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span id="popup_helios_heating_bar" data-role="header" data-theme="c" class="helios_popup_header"> Heizung </span>
+            <br/><br/>
+            Die Vor-/Nachheizung ist an.<br/>
+            Sie verbraucht derzeit ... W.
+        </div>
+        
+        /** Error indicator (whenever an error is up) **/
+        <div class="helios_error_icon" >
+            /** {{ _self.symbol_notzero(id~'_error', 'ventilation.rs485._device_error', icon0~'message_service.svg', 'ERROR!', '#popup_helios_error') }} **/
+			{{ basic.symbol(id~'_error', 'ventilation.rs485._device_error', 'ERROR!', icon0~'message_service.svg', 0, '!VAR1', 'red', '#popup_helios_error', '#popup_helios_error') }}
+			
+            /** Here's the corresponding popup with the detailed error description **/
+            <div id="popup_helios_error" class="helios_popup_error" data-role="popup" data-overlay-theme="c">
+                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+                <span data-role="header" data-theme="c" class="helios_popup_header"> {{ error_popup_title }} </span>
+                <br/>
+                <div class="helios_info_description">Fehler&nbsp;{{ basic.print(id~'_error_line_1', 'ventilation.alarms.last_error.code') }} </div><br/>
+                {% autoescape false %}
+                    {{ basic.print(id~'_error_line_2', 'ventilation.alarms.last_error.description') }}
+                    <br/>
+                    {{ basic.print(id~'_error_line_3', 'ventilation.alarms.last_error.cause') }}
+                    <br/>
+                    {{ basic.print(id~'_error_line_4', 'ventilation.alarms.last_error.solution') }}
+                    <br/>
+                    {% if documentation_mode %}
+                        {{ basic.slider(id~'_debug_error_slider', 'ventilation.testing.a_num', 0, 10, 1) }}
+                    {% endif %}
+                {% endautoescape %}
+            </div> 
+        </div>      
+
+        /** Bypass heat revovery - indicator **/        
+        /** ToDo: Auf richtige Variable prüfen **/
+        <div class="helios_bypass_indicator">
+            <a href="#popup_helios_bypass" data-rel="popup">{{ basic.symbol(id~'_bypass_ind', 'ventilation.rs485._bypass_disabled', '', 'audio_shuffle.svg', 0, '', 'rgb(205, 104, 35)') }}</a>
+        </div>
+        /** Here's the corresponding popup **/
+        <div id="popup_helios_bypass" class="helios_popup_bypass" data-role="popup" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span data-role="header" data-theme="c" class="helios_popup_header"> Heat recovery bypass </span>
+            <br/>
+            <div class="helios_info_description">Der Bypass ist an. </div><br/>
+            Es wird keine Wärme aus der Fortluft rückgewonnen.         
+        </div>      
+
+        /** Filter cleaning indicator (filter cleaning countdown ran out) **/
+        <div class="helios_filterchange_icon">
+            <a href="#popup_helios_filterchange" data-rel="popup">{{ basic.symbol(id~'_clean_filter', 'ventilation.rs485._clean_filter', '', 'vent_air_filter.svg', 0, '', 'orangered') }}</a>
+            <div class="helios_mini-info_rt">{{ basic.symbol(id~'_clean_filter_text', 'ventilation.rs485._clean_filter', 'FILTER', '', '0') }}</div>
+            /** {{ basic.text(id, gad, txt_on, txt_off, val_on, val_off) }} gegen {{ basic.symbol(id, items, text, icon, value, formula, color) }} ersetzt
+                Achtung - müsste bei allen Indicators gehen bis auf 'Fehler' (da nur mit Hilfsitem) **/
+        </div>
+        /** -----------> Todo: Rücksetzen des Wertes auf xx Monate) ----------------- **/
+        /** Here's the corresponding popup with the detailed error description **/
+        <div id="popup_helios_filterchange" class="helios_popup_filter" data-role="popup" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span data-role="header" data-theme="c" class="helios_popup_header"> {{ error_popup_title }} </span>
+            <br/>
+            <div class="helios_info_description">Ein Filterwechsel steht an. </div><br/>
+            Die KWL erinnert Dich regelmäßig, die Filter zu wechseln.
+            Diese Meldung ist nicht vom der Verschmutzung der Filter gesteuert,
+            sondern erscheint regelmäßig alle {} Monate.
+            
+            Zurücksetzen:
+        </div> 
+    
+        /** UZSU button and widget call up **/
+        {% if use_uzsu %}
+            <div class="helios_UZSU_button">
+                /** until 2.8: {{ uzsu.uzsu_icon(id~'_fanspeed_timer', 'ventilation.uzsu.uzsu_timer', ' ','0', 'time_timer.svg', 'time_timer.svg', 'num', 'An', 'Aus') }} **/
+                /** 2.9+: **/
+                {{ device.uzsuicon(id~'_fanspeed_timer', 'ventilation.uzsu.uzsu_timer', ' ', 'time_timer.svg', 'time_timer.svg','num' ) }}
+            </div>
+        {% endif %}
+        
+        /** Settings button and popup **/
+        <div class="helios_settings_button">
+            <a href="#popup_helios_settings" data-rel="popup">{{ basic.symbol(id~'_settings_button', 'ventilation.rs485._powerstate', '', 'edit_settings.svg', '1', '', 'orange') }}</a>
+        </div>
+        
+        <div id="popup_helios_settings" data-role="popup" class="helios_popup_settings" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span data-role="header" data-theme="c" class="helios_popup_header"> {{ settings_popup_title }} </span>
+
+            /** Bypass on/off **/
+            <div /**class="helios_bypass_indicator"**/>
+                /** noch umstellen:
+                
+                {{ basic.switch(id~'_bypass_state', 'ventilation.rs485._bypass_disabled', 'audio_fade.svg', 'audio_fade.svg') }}
+                
+                {{ basic.switch     (id, item, pic_on, pic_off, val_on, val_off, color_on, color_off) }}
+                {{ basic.stateswitch(id, item, type, value, icon, text, color, indicator) }}
+                **/
+            </div>
+            2 Tabs, 1x m³, m² usw<br/>
+            <br/>
+            Vorheizung ab: NaN °C<br/>
+            Frosttstop ab: NaN °C<br/>
+            Hysterese Frost: NaN °C<br/>
+            Bypass ab: NaN °C<br/>
+            Bypassautomatik: an/aus
+            
+            <div>
+                Status: {{ basic.flip('flip1', 'ventilation.rs485._powerstate') }} 
+                
+                /** ggf. noch umstellen: 
+                {{ basic.dual('flip2', 'ventilation.rs485._powerstate') }}
+                
+                {{ basic.dual(id, item, pic_on, pic_off, val_on, val_off, type, color_on, color_off) }}
+                {{ basic.stateswitch(id, item, type, value, icon, text, color, indicator) }}
+                **/
+                Value: {{ basic.print(id~'_power_xstate', 'ventilation.rs485._powerstate') }}
+                <br/>
+                Achtung: Die Fernbedienung kann vom Widget nicht wieder <br/>eingeschaltet werden und setzt bei Betätigung die Anlage auf die<br/> eingestellte Mindeststufe zurück.
+            </div>
+        </div>
+            
+        /** Info popup **/
+        <div class="helios_info_button">
+            <a href="#helios_info_popup" data-rel="popup">{{ basic.symbol(id~'_info_button', 'ventilation.rs485._powerstate', '', 'message_info.svg', '1', '', 'orange') }}</a>
+        </div>
+        /** Here's the corresponding popup for the info window **/      
+        <div id="helios_info_popup" data-role="popup" class="helios_popup_info" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+
+            <span id="popup_helios_info_bar" data-role="header" data-theme="c" class="helios_popup_header"> {{ info_popup_title }} </span>
+
+            <div class="kwlcontainer">
+
+                <div id="kwltab-1" class="kwltab-content current">
+                    <br/>
+                    <div class="helios_info_description">&nbsp;Luftaustauschrate:&nbsp;</div>
+                    <div class="helios_info_value">{{ basic.print(id~'_info1_1', 'ventilation.airflow.air_exchange_rate' ) }}</div><br/>
+                    <div class="helios_info_description">Effizienz:</div>
+                    <div class="helios_info_value">{{ basic.print(id~'_info1_2', 'ventilation.thermal_energy.efficiency.as_text' ) }}</div>					
+                </div>
+                
+                <div id="kwltab-2" class="kwltab-content">
+
+				
+				/** {% macro vol_per_hr_chart(vmax, tick1, tick2, tick3, tick4, curr_value) %} **/
+					{{ _self.vol_per_hr_chart('ventilation.parameters.max_airflow', 'ventilation.airflow.DIN.moisture_protection', 'ventilation.airflow.DIN.reduced_air_exchange', 'ventilation.airflow.DIN.normal_air_exchange', 'ventilation.airflow.DIN.boost_air_exchange', 'ventilation.airflow.supply_fan.effective') }}
+				
+                    <div class="helios_info_description" style="margin-top:145px; position:relative;">Stufe {{ basic.print(id~'_info2_1', 'ventilation.rs485._fanspeed') }} - &nbsp;
+                    {{ basic.print(id~'_info2_2', 'ventilation.airflow.exhaust_fan') }} m³/h &nbsp;&nbsp;({{ basic.print(id~'_info2_3', 'ventilation.airflow.air_exchange_rate') }})</div>
+                    <div class="helios_info_subheader">DIN-Forderungen für {{ basic.print(id~'_info2_5', 'ventilation.parameters.Ane') }} m² {{ basic.print(id~'_info2_4', 'ventilation.parameters.fWS.daemmung') }}</div>
+                    <div class="helios_info_smalltext">
+                        {% autoescape false %} 
+                            {% for title,item in info_DIN_items %}
+                                <div> /** 1 item per line **/
+                                    <span class="helios_info_left">{{ title }}</span>
+                                    <span class="helios_info_right">{{ basic.print(id~'_info_'~item~'1', 'ventilation.airflow.DIN.'~item ) }} m³/h ({{ basic.print(id~'_info_'~item~'2', 'ventilation.airflow.DIN.'~item~'.air_exchange_rate' ) }})</span>
+                                </div></br/>
+                            {% endfor %}
+                        {% endautoescape %} 
+                    </div>
+				</div>
+
+                <div id="kwltab-3" class="kwltab-content">
+                    <div class="helios_info_subheader">Aktuelle Werte:</div>
+                    <br/>
+                    <br/>                   
+                    Dummytext
+                    
+                    <br/>
+                </div>
+                
+                <div id="kwltab-4" class="kwltab-content">
+                    <div class="helios_info_subheader">Aktuelle Werte:</div>
+                    <br/>
+                    <div class="helios_info_description" style="margin-bottom: 9px;">Frischluft: {{ basic.print(id~'_info4_1', 'ventilation.rs485._outside_temp') }} °C<br/>Abluft: {{ basic.print(id~'_info4_2', 'ventilation.rs485._inside_temp') }} °C</div>
+                    <br/>
+                    <div class="helios_info_subheader">Die Wärmerückgewinnung ist{{ basic.print(id~'_info4_3', 'ventilation.bypass.heat_recovery.as_text') }}.</div>
+                    <div class="helios_info_smalltext">
+                        Wenn die Außenluft um{{ basic.print(id~'_info4_4', 'ventilation.rs485._bypass_setpoint', '°C') }} wärmer ist als die Abluft, wird die Bypassklappe geöffnet und dadurch die Wärmerückgewinnung gestoppt.<br/><br/>
+                        Die zugehörige Automatik ist derzeit {{ basic.print(id~'_info4_4', 'ventilation.bypass.heat_recovery.as_text' ) }}.<br/>
+                    </div>                      
+                </div>
+
+                <div id="kwltab-5" class="kwltab-content">
+                    <br/>
+                    <div class="helios_info_description" style="margin-bottom: 12px;">Fortluft: {} °C</div>
+                    <br/>
+                    <div class="helios_info_subheader">Der Frostschutz ist {}.</div>
+                    <div class="helios_info_smalltext">
+                        Der Zuluftmotor wird gestoppt, wenn die Fortluft unter {}°C sinkt. Bei über {}°C wird er wieder gestartet.
+                        Dazwischen heizt die Abluft den Wärmetauscher, um Vereisung zu verhindern.<br/>
+                        <br/>
+                    </div>
+                    <div class="helios_info_subheader"">Die Vorheizung ist {}.</div>
+                    <div class="helios_info_smalltext">
+                        Die Heizung wird bei Fortluft unter {}°C aktiviert.<br/>
+                        (Nie an, wenn kleiner Frostschutzwert eingestellt) 
+                        <br/><br/>
+                    </div>
+                </div>
+                
+                <div id="kwltab-6" class="kwltab-content">
+                    <div class="helios_info_subheader">xxx:</div>
+                    Wärmebilanz zu / ab
+                </div>
+
+                <ul class="kwltabs">
+                    <li class="kwltab-link ui-btn-corner-all current" data-tab="kwltab-1" data-desc="Allgemein">&nbsp;1&nbsp;</li>
+                    <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-2" data-desc="Luftaustausch">&nbsp;2&nbsp;</li>
+                    <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-3" data-desc="Motoren">&nbsp;3&nbsp;</li>
+                    <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-4" data-desc="Hitzeschutz-Automatik (Bypass)">&nbsp;4&nbsp;</li>
+                    <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-5" data-desc="Frostschutz-Automatik">&nbsp;5&nbsp;</li>
+                    <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-6" data-desc="Wärmebilanz">&nbsp;6&nbsp;</li>
+                </ul>
+                
+            </div><!-- kwlcontainer -->
+
+        </div>
 
 
+
+        /** Boost air button and popup **/
+        <div class="helios_booster_button">
+            <a href="#popup_interactive_booster" data-rel="popup">{{ basic.symbol(id~'_boost_button', 'ventilation.rs485._powerstate', '', 'vent_ventilation_level_3.svg', '1', '', 'white') }}</a>
+        </div>
+        
+        <div id="popup_interactive_booster" data-role="popup" class="helios_popup_booster_interactive" data-overlay-theme="c">
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
+            <span data-role="header" data-theme="c" class="helios_popup_header">{{ booster_popup_title }}</span>
+            <br/>
+
+            <table><colgroup><col width=20% float="left"><col width=79% float="right"></colgroup>
+                <tr>
+                    <td>
+                        Dauer: {% if debug_mode %}<br/>{{ basic.print(id~'_boost_duration_debug', 'ventilation.booster.logics.boost_duration') }}{% endif %}
+                    </td>
+                    <td>
+						{{ basic.select(id~'_boost_duration', 'ventilation.booster.logics.boost_duration', 'micro', [900,1800,2700,3600,5400,7200], '',['15\'','30\'','45\'','1h','90\'','2h']) }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Anheizen:
+                        {% if debug_mode %}<br/><small><i>{{ basic.print(id~'_fireplace_duration_debug', 'ventilation.booster.logics.fireplace_duration') }}</i></small>{% endif %}
+                    </td>
+                    <td>
+                        /** {{ _self.radiogroup(id~'_fireplace_duration', 'ventilation.booster.logics.fireplace_duration', ['Aus','15\'','30\''], [0,900,1800]) }} **/
+                        <br/>
+                        /** {{ _self.symbol_notzero('noch_ein_Test', 'ventilation.booster.boost_remaining_a', icon0~'message_attention.png', 'MY ERROR TEXT!', 'http://www.google.de') }} **/
+                    </td>
+                </tr>
+            </table>
+            
+            <br/><br/>
+            
+            <div class="helios_infotable">
+                Stufe:
+                {{ basic.slider(id~'_boost_level_slider', 'ventilation.booster.logics.level', 1, 8, 1) }}
+            </div>
+                
+            <br/><br/>
+
+            Kamin: Abbluft-Motor herunterregeln auf xx%.
+            <br/>
+            <br/>
+            [Start-Button]<br/>
+            <br/>
+         </div> 
+
+
+        
+        /** Documentation mode only - show all icons**/
+        {% if documentation_mode %}
+            <div class="helios_frost_indicator"><a href="#helios_frost_popup" data-rel="popup">{{ basic.symbol(id~'_doc_frost_ind', 'ventilation.frost_protection.is_on', '', 'temp_frost.svg', 0, '', 'rgb(205, 104, 35)') }}</a><div class="helios_mini-info_or">STOP</div></div>
+            <div class="helios_heating_indicator"><a href="#helios_heating_popup" data-rel="popup">{{ basic.symbol(id~'_doc_heating_ind', 'ventilation.heating.is_on', '', 'sani_floor_heating.svg', 0, '', 'rgb(205, 104, 35)') }}</a><div class="helios_mini-info_or">HEIZUNG</div></div>
+            <div class="helios_error_icon"><div class="helios_mini-info_rt">FEHLER</div><a href="#popup_helios_error" data-rel="popup">{{ basic.symbol(id~'_doc_error_ind', 'ventilation.rs485._device_error', '', 'message_service.svg', 0, '', 'red') }}</a></div>
+/**         <div class="helios_filterchange_icon"><a href="#popup_helios_filterchange" data-rel="popup">{{ basic.symbol(id~'_doc_clean_filter', 'ventilation.rs485._clean_filter', '', 'vent_air_filter.svg', 0, '', 'red') }}</a><div class="helios_mini-info_rt">FILTER</div></div> **/
+            <div class="helios_bypass_indicator"><a href="#popup_helios_bypass" data-rel="popup">{{ basic.symbol(id~'_doc_bypass_ind', 'ventilation.rs485._bypass_disabled', '', 'audio_shuffle.svg', 1, '', 'rgb(205, 104, 35)') }}</a><div class="helios_mini-info_or">BYPASS</div></div>
+            <div class="helios_thermalinfo_defrost"><small>{{ basic.print(id~'_doc_defrost', 'ventilation.thermal_energy.defrost.as_text' ) }}<br/>(erwärmen)</small></div>
+        {% endif %}
+
+
+<!--    alte Booster
         /** Original Helios booster switch - use with care, cannot be deactivated once started - "helios mode" **/
         /** Disabled until plugin version 2
         <div class="helios_booster_switch_helios">
             {{ basic.switch(id~'helios_boost_builtin', 'ventilation.rs485._boost_on','', icon0~'vent_ventilation_level_3.png') }}
             </br><small>&nbsp;&nbsp;Helios</small>
         </div> **/
-        /** ----------- > Todo: Bei Restzeit > 0 hier statt des Icons die verbleibende Zeit mittels basic.value / rs485._boost_status und rs485._boost_remaining einblenden --- **/
+        /** ----------- > Todo: Bei Restzeit > 0 hier statt des Icons die verbleibende Zeit mittels basic.print / rs485._boost_status und rs485._boost_remaining einblenden --- **/
 
         
         /** Use this one for logic-triggered booster mode - "easy mode" **/
@@ -174,366 +498,49 @@
         
         /** Use this one for logic-triggered booster mode - "interactive mode" with popup **/
         <div class="helios_booster_switch_interactive">     
-            <a href="#popup_interactive_booster" data-rel="popup"><img src="{{helios_pic_dir~'/vent_ventilation_level_0.svg'}}" class="icon" /** onload="set_duration(2700) **/"></a>
+            <a href="#popup_interactive_booster" data-rel="popup"><img src="{{'vent_ventilation_level_0.svg'}}" class="icon" /** onload="set_duration(2700) **/"></a>
             /** </br><small>Interactive</small> **/
         </div>
         /** ----------- > Todo: Popup fertigstellen, Restzeit einblenden **/
--->                     
-
-        /** ---------- *
-        *   Indicators *
-        *   -------- **/ 
-                        
-        /** Frost indicator (outside air fan stopped due to frost) **/
-        <div class="helios_frost_indicator">
-            {{ basic.symbol(id~'_frost_ind1', 'ventilation.frost_protection.is_on', '', 'temp_frost.svg', 1, '', 'red') }}
-        </div>
-
-        /** Heating indicator (electrical pre-heating switched on) **/
-        <div class="helios_heating_indicator">
-            {{ basic.symbol(id~'_heating_ind', 'ventilation.heating.is_on', '', helios_pic_dir~'/sani_floor_heating.svg', 1, '', 'red') }}
-        </div>      
-        
-        /** Error indicator (whenever an error is up) **/
-        <div class="helios_error_icon">
-            {{ _self.symbol_notzero(id~'_error', 'ventilation.rs485._device_error', helios_pic_dir~'/message_service.svg', 'ERROR!', '#popup_helios_error') }}
-            /** Here's the corresponding popup with the detailed error description **/
-            <div id="popup_helios_error" class="helios_popup_error" data-role="popup" data-overlay-theme="c">
-                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span class="ui-btn-up-c helios_popup_header"> {{ error_popup_title }} </span>
-                <br/>
-                <div class="helios_info_description">Fehler&nbsp;{{ basic.value(id~'_error_line_1', 'ventilation.alarms.last_error.code') }} </div><br/>
-                {% autoescape false %}
-                    {{ basic.value(id~'_error_line_2', 'ventilation.alarms.last_error.description') }}
-                    <br/>
-                    {{ basic.value(id~'_error_line_3', 'ventilation.alarms.last_error.cause') }}
-                    <br/>
-                    {{ basic.value(id~'_error_line_4', 'ventilation.alarms.last_error.solution') }}
-                    <br/>
-                    {% if debug_mode %}
-                        {{ basic.slider(id~'_debug_error_slider', 'ventilation.testing.a_num', 0, 10, 1) }}
-                    {% endif %}
-                {% endautoescape %}
-            </div> 
-        </div>      
-
-        /** Filter cleaning indicator (filter cleaning countd own ran out) **/
-        <div class="helios_filterchange_icon">
-            {{ basic.symbol(id~'_clean_filter', 'ventilation.rs485._clean_filter', '', 'vent_air_filter.svg', 0, '', 'orangered') }}
-            /** -----------> Todo: Rücksetzen des Wertes auf xx Monate Popoup) ----------------- **/
-        </div>
-        /** For testing only - in case of error, you will need to switch off the device anyways
-        <br/>
-        <div class="helios-resetbutton">{{ basic.button(id~'_error_confirm',  'ventilation.testing.a_num', 'Zurücksetzen', '', '0', '') }}</div> **/
-
-        
-        
-        <div> /** evtl block im block, oder unter den div-block verschieben??? **/
-                
-            /** Info popup **/
-            <div class="helios_info_button">
-                <a href="#popup_helios_info" data-rel="popup"><img src="{{helios_pic_dir~'/message_info_or.svg'}}" class="icon"></a>
-            </div>
-            /** Here's the corresponding popup for the info window **/      
-            <div id="popup_helios_info" data-role="popup" class="helios_popup_info" data-overlay-theme="c">
-                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span id="popup_helios_info_bar" class="ui-btn-up-c helios_popup_header"> {{ info_popup_title }} </span>
-
-/** ---------> aktuelle Arbeiten -------------------------------------------------------------------------------------------------------- **/
-        
-                <script type="text/javascript"> 
-                    $(document).ready(function(){
-                        
-                        $('ul.kwltabs li').click(function(){
-                            var tab_id = $(this).attr('data-tab');
-
-                            $('ul.kwltabs li').removeClass('current');
-                            $('.kwltab-content').removeClass('current');
-
-                            $(this).addClass('current');
-                            $("#"+tab_id).addClass('current');
-                            
-                            $("#popup_helios_info_bar").text($(this).attr('data-desc'));
-                        })
-
-                    })
-                </script>
-
-
-                <div class="kwlcontainer">
-
-                    <div id="kwltab-1" class="kwltab-content current">
-                        <br/>
-                        <div class="helios_info_description">&nbsp;Luftaustauschrate:&nbsp;</div>
-                        <div class="helios_info_value">{{ basic.value(id~'_info1_1', 'ventilation.airflow.air_exchange_rate' ) }}</div><br/>
-                        <div class="helios_info_description">Effizienz:</div>
-                        <div class="helios_info_value">{{ basic.value(id~'_info1_2', 'ventilation.thermal_efficiency.efficiency.as_text' ) }}</div>
-                    </div>
-                    
-                    <div id="kwltab-2" class="kwltab-content">
-                        <div class="helios_info_subheader">Aktuelle Werte:</div>
-                        <br/>
-                        <div class="helios_info_description">Stufe {{ basic.value(id~'_info2_1', 'ventilation.rs485._fanspeed') }}</br/>
-                        {{ basic.value(id~'_info2_2', 'ventilation.airflow.exhaust_fan') }} m³/h &nbsp;&nbsp;({{ basic.value(id~'_info2_3', 'ventilation.airflow.air_exchange_rate') }})</div>
-                        <br/>
-                        <div class="helios_info_subheader">DIN-Werte ({{ basic.value(id~'_info2_4', 'ventilation.parameters.fWS.daemmung') }}, {{ basic.value(id~'_info2_5', 'ventilation.parameters.Ane') }} m²)</div>
-                        <div class="helios_info_smalltext">
-                            <br/>
-                            {% autoescape false %} 
-                                {% for title,item in info_DIN_items %}
-                                    <div> /** 1 item per line **/
-                                        <span class="helios_info_left">{{ title }}</span>
-                                        <span class="helios_info_right">{{ basic.value(id~'_info_'~item~'1', 'ventilation.airflow.DIN.'~item ) }} m³/h ({{ basic.value(id~'_info_'~item~'2', 'ventilation.airflow.DIN.'~item~'.air_exchange_rate' ) }})</span>
-                                    </div></br/>
-                                {% endfor %}
-                            {% endautoescape %} 
-                        </div>
-                    </div>
-
-                    <div id="kwltab-3" class="kwltab-content">
-                        <div class="helios_info_subheader">Aktuelle Werte:</div>
-                        <br/>
-                    </div>
-                    
-                    <div id="kwltab-4" class="kwltab-content">
-                        <div class="helios_info_subheader">Aktuelle Werte:</div>
-                        <div class="helios_info_description" style="margin-bottom: 9px;">Frischluft: {{ basic.value(id~'_info4_1', 'ventilation.rs485._outside_temp') }} °C<br/>Abluft: {{ basic.value(id~'_info4_2', 'ventilation.rs485._inside_temp') }} °C</div>
-                        <div class="helios_info_subheader">Die Wärmerückgewinnung ist{{ basic.value(id~'_info4_3', 'ventilation.bypass.heat_recovery.as_text') }}.</div>
-                        <div class="helios_info_smalltext">
-                            Wenn die Außenluft um {}°C wärmer ist als die Abluft, wird die Bypassklappe geöffnet und dadurch die Wärmerückgewinnung deaktiviert.<br/><br/>
-                            Diese Automatik ist derzeit {} und kann in den Einstellungen und am Bedienteil ein- und ausgeschaltet werden.<br/><br/>
-                        </div>                      
-                    </div>
-
-                    <div id="kwltab-5" class="kwltab-content">
-                        <div class="helios_info_subheader">Aktuelle Werte:</div>
-                        <div class="helios_info_description" style="margin-bottom: 12px;">Fortluft: {} °C</div>
-                        <div class="helios_info_subheader">Der Frostschutz ist {}.</div>
-                        <div class="helios_info_smalltext">
-                            Der Zuluftmotor wird gestoppt, wenn die Fortluft unter {}°C sinkt. Bei über {}°C wird er wieder gestartet.
-                            Dazwischen heizt die Abluft den Wärmetauscher, um Vereisung zu verhindern.<br/>
-                            (Eine Deaktivierung ist werksseitig nicht möglich)<br/><br/>
-                        </div>
-                        <div class="helios_info_subheader"">Die Vorheizung ist {}.</div>
-                        <div class="helios_info_smalltext">
-                            Die Heizung wird bei Fortluft unter {}°C aktiviert.<br/>
-                            (Nie an, wenn kleiner Frostschutzwert eingestellt) 
-                            <br/><br/>
-                        </div>
-                    </div>
-
-
-                    
-
-                    <ul class="kwltabs">
-                        <li class="kwltab-link ui-btn-corner-all current" data-tab="kwltab-1" data-desc="Allgemeiner Status">&nbsp;1&nbsp;</li>
-                        <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-2" data-desc="Luftaustausch im Detail">&nbsp;2&nbsp;</li>
-                        <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-3" data-desc="Status der Motoren">&nbsp;3&nbsp;</li>
-                        <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-4" data-desc="Überwachung der Zuluft">&nbsp;4&nbsp;</li>
-                        <li class="kwltab-link ui-btn-corner-all" data-tab="kwltab-5" data-desc="Überwachung der Fortluft">&nbsp;5&nbsp;</li>
-                    </ul>
-                    
-                </div><!-- kwlcontainer -->
-
-
-                <style type="text/css" rel="stylesheet">
-
-                    .helios_UZSU_button {
-                        position: absolute;
-                        margin-top: -345px;
-                        margin-left: 450px;
-                    }
-                                            
-                    .helios_booster_button {
-                    position: absolute;
-                    margin-left: 390px;
-                    margin-top: -345px;
-                    }
-                    
-                    .helios_settings_button {
-                        position: absolute;
-                        margin-left: 75px;
-                        margin-top: -345px;
-                    }
-                    
-                    .helios_info_subheader {
-                        background-color: lightgrey;
-                        color: black;
-                        margin-top: 3px;
-                        margin-bottom: 3px;
-                    }
-                    
-                    .helios_info_smalltext {
-                        text-align: justify;
-                        font-size: smaller;
-                        margin-top: 3px;
-                        margin-bottom: 3px;
-                    }
-                    
-                    .kwlcontainer{
-                        width: 280px;
-                        margin: 0 auto;
-                        text-align: center;
-                    }
-
-                    ul.kwltabs{
-                        margin: 0px;
-                        padding: 0px;
-                        list-style: none;
-                    }
-                    
-                    ul.kwltabs li{
-                        background: none;
-                        color: white;
-                        display: inline-block;
-                        padding: 10px 15px;
-                        cursor: pointer;
-                    }
-
-                    ul.kwltabs li.current{
-                        background: #FFA121;
-                        color: white;
-                    }
-
-                    .kwltab-content{
-                        display: none;
-                        background: #ededed;
-                        padding: 15px;
-                        height: 250px;
-                    }
-
-                    .kwltab-content.current{
-                        display: inherit;
-                        color: white;
-                        background: none;
-                    }
-                </style>
+-->   
 
 
 
-            </div>
-            
-            /** Settings button and popup **/
-            <div class="helios_settings_button">
-                <a href="#popup_helios_settings" data-rel="popup">{{ basic.symbol(id~'_settings_button', 'ventilation.rs485._power_state', '', 'edit_settings.svg', '1', '', 'orange') }}</a>
-            </div>
-            
-            <div id="popup_helios_settings" data-role="popup" class="helios_popup_settings" data-overlay-theme="c">
-                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span class="ui-btn-up-c helios_popup_header"> {{ settings_popup_title }} </span>
-
-                /** Bypass on/off **/
-                <div class="helios_bypass_switch">
-                    {{ basic.switch(id~'_bypass_state', 'ventilation.rs485._bypass_disabled', helios_pic_dir~'/audio_fade_or.svg', helios_pic_dir~'/audio_fade_ws.svg') }}
-                </div>
-            </div>
-            
-            /** UZSU button and widget call up **/
-            {% if use_uzsu %}
-                <div class="helios_UZSU_button">
-                    /** Funktionierend bis 2.8: **/
-                    /** {{ uzsu.uzsu_icon(id~'_fanspeed_timer', 'ventilation.uzsu.uzsu_timer', ' ','0', 'time_timer.svg', 'time_timer.svg', 'num', 'An', 'Aus') }} **/
-                    /** Neu ab 2.9: **/
-                    {{ device.uzsuicon(id~'_fanspeed_timer', 'ventilation.uzsu.uzsu_timer', ' ', 'time_timer.svg', 'time_timer.svg','num' ) }}
-                </div>      
-            {% endif %}
-            
-            /** Boost air button and popup **/
-            <div class="helios_booster_button">
-                <a href="#popup_interactive_booster" data-rel="popup">{{ basic.symbol(id~'_boost_button', 'ventilation.rs485._power_state', '', 'vent_ventilation_level_3.svg', '1', '', 'orange') }}</a>
-            </div>
-            
-            <div id="popup_interactive_booster" data-role="popup" class="helios_popup_booster_interactive" data-overlay-theme="c">
-                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span style="float:center;" class="ui-btn-up-c">{{ booster_popup_title }}</span>
-                <br/>
-
-                <table><colgroup><col width=20% float="left"><col width=79% float="right"></colgroup>
-                    <tr>
-                        <td>
-                            Dauer:{% if debug_mode %}<br/>{{ basic.value(id~'_boost_duration_debug', 'ventilation.booster.logics.boost_duration') }}{% endif %}
-                        </td>
-                        <td>
-                            {{ _self.radiogroup(id~'_boost_duration', 'ventilation.booster.logics.boost_duration', ['15\'','30\'','45\'','1h','90\'','2h'], [900,1800,2700,3600,5400,7200]) }}
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            Anheizen:
-                            {% if debug_mode %}<br/><small><i>{{ basic.value(id~'_fireplace_duration_debug', 'ventilation.booster.logics.fireplace_duration') }}</i></small>{% endif %}
-                        </td>
-                        <td>
-                            {{ _self.radiogroup(id~'_fireplace_duration', 'ventilation.booster.logics.fireplace_duration', ['Aus','15\'','30\''], [0,900,1800]) }}
-                            <br/>
-                            {{ _self.value_notzero('ein_Test', 'ventilation.booster.logics.boost_duration', '\'','') }}
-                            /** {{ _self.symbol_notzero('noch_ein_Test', 'ventilation.booster.boost_remaining_a', helios_pic_dir~'/message_attention.png', 'MY ERROR TEXT!', 'http://www.google.de') }} **/
-                        </td>
-                    </tr>
-                </table>
-                
-                <br/><br/>
-                
-                <div class="helios_infotable">
-                    Stufe:
-                    {{ basic.slider(id~'_boost_level_slider', 'ventilation.booster.logics.level', 1, 8, 1) }}
-                </div>
-                    
-                <br/><br/>
-
-                Kamin: Abbluft-Motor herunterregeln auf xx%.
-                <br/>
-                <br/>
-                [Start-Button]<br/>
-                <br/>
-                </div> 
-
-            </div>
-        
-        /** Documentation mode only - show all icons**/
-        {% if documentation_mode %}
-            /** <div class="helios_frost_indicator">{{ basic.symbol(id~'_doc_frost_ind', 'ventilation.frost_protection.is_on', '', 'temp_frost.svg', 0, '', 'red') }}</div> **/
-            <div class="helios_heating_indicator">{{ basic.symbol(id~'_doc_heating_ind', 'ventilation.heating.is_on', '', 'sani_floor_heating.svg', 0, '', 'red') }}</div>
-            <div class="helios_error_icon">{{ basic.symbol(id~'_doc_error_ind', 'ventilation.rs485._device_error', '', helios_pic_dir~'/message_service.svg', 0) }}</div>
-            /** <div class="helios_filterchange_icon">{{ basic.symbol(id~'_doc_clean_filter', 'ventilation.rs485._clean_filter', '', 'vent_air_filter.svg', 0, '', 'red') }}</div> **/
-        {% endif %}
-
-        
+ 
         /** Debug mode only - show additional features **/
         {% if debug_mode %}
-            
             <div class="helios_debug_info">
                 Debug -ON-
             </div>
             
             <div class="helios_faninfo_left">
-                Motor: {{ basic.value(id~'_faninfo_left_1', 'ventilation.fans.supply.info1' ) }} <br/>
-                {{ basic.value(id~'_faninfo_left_2', 'ventilation.fans.supply.info2' ) }}
+                Motor: {{ basic.print(id~'_faninfo_left_1', 'ventilation.fans.supply.info1' ) }} <br/>
+                {{ basic.print(id~'_faninfo_left_2', 'ventilation.fans.supply.info2' ) }}
             </div>
             
             <div class="helios_faninfo_right">
-                Motor: {{ basic.value(id~'_faninfo_right_1', 'ventilation.fans.exhaust.info1' ) }} <br/>
-                {{ basic.value(id~'_faninfo_right_2', 'ventilation.fans.exhaust.info2' ) }}
+                Motor: {{ basic.print(id~'_faninfo_right_1', 'ventilation.fans.exhaust.info1' ) }} <br/>
+                {{ basic.print(id~'_faninfo_right_2', 'ventilation.fans.exhaust.info2' ) }}
             </div>
             
             <div class="helios_bypass">
-                Bypass: {{ basic.value(id~'_bypass_state1', 'ventilation.bypass.is_on.as_text' ) }}<br/>
-                (T<sub>aussen</sub> > {{ basic.value(id~'_bypass_setpoint', 'ventilation.bypass.setpoint.as_text' ) }})
+                Bypass: {{ basic.print(id~'_bypass_state1', 'ventilation.bypass.is_on.as_text' ) }}<br/>
+                (T<sub>aussen</sub> > +{{ basic.print(id~'_bypass_setpoint', 'ventilation.bypass.setpoint.as_text' ) }})
             </div>
             
             <div class="helios_heating">
-                Frost stop: {{ basic.value(id~'_thermalinfo_heating_frost_stop', 'ventilation.frost_protection.is_on.as_text' ) }}<br/>
-                (T<sub>fort</sub> <{{ basic.value(id~'_thermalinfo_frost_protect_on', 'ventilation.frost_protection.hysteresis.celsius.as_text' ) }}|{{ basic.value(id~'_thermalinfo_frost_protect_off', 'ventilation.frost_protection.end_setpoint.as_text' ) }})<br/>
-                Heizung: {{ basic.value(id~'_thermalinfo_heating_status', 'ventilation.heating.is_on.as_text' ) }}<br/>
-                (T<sub>fort</sub> <{{ basic.value(id~'_thermalinfo_heating_setpoint', 'ventilation.heating.setpoint.as_text' ) }})
+                Frost stop: {{ basic.print(id~'_thermalinfo_heating_frost_stop', 'ventilation.frost_protection.is_on.as_text' ) }}<br/>
+                (T<sub>fort</sub> <{{ basic.print(id~'_thermalinfo_frost_protect_on', 'ventilation.frost_protection.hysteresis.celsius.as_text' ) }}|{{ basic.print(id~'_thermalinfo_frost_protect_off', 'ventilation.frost_protection.defrost_end.as_text' ) }})<br/>
+                Heizung: {{ basic.print(id~'_thermalinfo_heating_status', 'ventilation.heating.is_on.as_text' ) }}<br/>
+                (T<sub>fort</sub> <{{ basic.print(id~'_thermalinfo_heating_setpoint', 'ventilation.heating.setpoint.as_text' ) }})
             </div>
             
             <div class="helios_thermalinfo_efficiency">
-                ƞ ={{ basic.value(id~'_thermalinfo_efficiency', 'ventilation.thermal_efficiency.efficiency.as_text' ) }}
+                ƞ ={{ basic.print(id~'_thermalinfo_efficiency', 'ventilation.thermal_energy.efficiency.as_text' ) }}
             </div>
             
             <div class="helios_thermalinfo_exchange_rate">
-                β ={{ basic.value(id~'_thermalinfo_exchange_rate', 'ventilation.airflow.air_exchange_rate' ) }}
+                β ={{ basic.print(id~'_thermalinfo_exchange_rate', 'ventilation.airflow.air_exchange_rate' ) }}
             </div>
                 
             <div class="helios_boost_1">
@@ -545,129 +552,222 @@
 
             {% if boost_mode == '1' %}
                 <div class="helios_boost_2">
-                    Voreinstellung:<br/>{{ basic.value(id~'_boostermode', 'ventilation.booster.built_in.mode' ) }}
+                    Voreinstellung:<br/>{{ basic.print(id~'_boostermode', 'ventilation.booster.built_in.mode' ) }}
                 </div>
             {% endif %}
+
             
-            /** Quick 'n dirty UZSU logic testing tool: Simulate function of timer by triggering corresponding variable by hand **/
-            /** Important - variable currently not yet initialized properly, only works after 1st trigger! **/
-            <div class="helios_uzsutest_button"><a href="#popup-test-uzsu" data-rel="popup">UZSU-Test</a></div>
-            /** The popup **/
-            <div id="popup-test-uzsu" class="helios_popup_uzsutest" data-role="popup" data-overlay-theme="c">
-                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-iconpos="notext" class="ui-btn-right";>Close</a>
-                <span style="float:center;" class="ui-btn-up-c">{{ uzsu_tester_title }} {{ basic.value('helios_uzsu_tool', 'ventilation.uzsu.fanspeed_uzsu') }}</span>
-                <br/>
-                {% for level in 0..8 %}
-                    {% set itemid = id~'_test_level_'~level %}
-                    {{ basic.button(itemid, 'ventilation.uzsu.fanspeed_uzsu', level, '', level, 'mini') }} &nbsp; &nbsp;
-                    {% if level == 0 or level == 4 %} <br/><br/> {% endif %}
-                {% endfor %}
-                <br/>
-            </div> 
-            
+            /** ---- Vermutlich jetzt überflüssig ---- **/
             
             <div class="helios_alarmtest_button"><a href="#popup_helios_error" data-rel="popup">Alarmtest</a></div>
             
-            
-            <div class="helios_filtertest_button"><a href="#popup-test-filter" data-rel="popup">Filtertest</a></div>            
+            <div class="helios_filtertest_button"><a href="#popup-test-filter" data-rel="popup">Filtertest</a></div>
+
+            /** Temporary only: Alternative calculations **/
+            <div class="helios_thermalinfo_total"><br/>{{ basic.print(id~'_thermalinfo_total1', 'ventilation.thermal_energy.alt_total_outgoing' ) }}</div>
+            <div class="helios_thermalinfo_recovered"><br/>{{ basic.print(id~'_thermalinfo_rcovered1', 'ventilation.thermal_energy.alt_recovery' ) }}</div>
+            <div class="helios_thermalinfo_lost"><br/>{{ basic.print(id~'_thermalinfo_lost1', 'ventilation.thermal_energy.alt_loss' ) }}</div>
+            <div class="helios_thermalinfo_defrost"><br/><br/>{{ basic.print(id~'_thermalinfo_heating', 'ventilation.thermal_energy.alt_defrost' ) }}</div>
+            /** --------------------------------------- **/
             
         {% endif %}
 
-
-
-
-
         
-        /** ---------> aktuelle Arbeiten -------------------------------------------------------------------------------------------------------- **/
-
-        /** Here's the popup for the interactive booster mode **/
-
-
     </div>
 
+	
+    /** Info tabs **/
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            
+            $('ul.kwltabs li').click(function(){
+                var tab_id = $(this).attr('data-tab');
+
+                $('ul.kwltabs li').removeClass('current');
+                $('.kwltab-content').removeClass('current');
+
+                $(this).addClass('current');
+                $("#"+tab_id).addClass('current');
+                
+                $("#popup_helios_info_bar").text($(this).attr('data-desc'));
+            })
+
+        })
+    </script>
     
-/** <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="280" height="280">
-    <title>Titel</title>
-    <desc>ein SVG</desc>
-    <defs>
-        <symbol id="smilie">
-            <desc>ein Symbol-Smilie</desc>
-            <circle cx="20" cy="20" r="15" fill="yellow" stroke="black" />
-            <path d="M 13 26 A 5 3 0 0 0 27 26" stroke="black" fill="none" stroke-width="2" />
-        </symbol>
-    </defs>
-    <use xlink:href="#smilie" transform="translate(-20,-20) scale(8)" />
-    <text x="79" y="119">S</text>
-    <text x="117" y="170">V</text>
-    <text x="156" y="119">G</text>
-</svg> **/
-
 {% endmacro %}
 
-/**
-* Displays a group of radio buttons
-*
-* @param id        a unique id for this widget
-* @param gad       the gad/item
-* @param labels    the text labels to put on the buttons
-* @param vals      the real item values the button / label represents
-* sampele call when embedded in an html file:
-* _self.radiogroup(id~'_boost_duration', 'ventilation.booster.logics.boost_duration', ['15\'','30\'','45\'','1h','90\'','2h'], [900,1800,2700,3600,5400,7200]) }}
-*/
-{% macro radiogroup(id, gad, labels, vals) %} /** ---------- Radio button macro ---------------- **/
-    {% set rid=uid(page,id) %}
-    <span data-role="controlgroup" data-type="horizontal">
-        {% for nr in 0..labels|length-1 %}
-            <span id="{{rid}}-button-{{nr}}" btn-id="{{rid}}_radio_{{nr}}" data-widget="helios.radiobutton" data-item="{{gad}}" data-val="{{vals[nr]}}">
-                <input type='radio' id='{{rid}}_radio_{{nr}}' name='{{rid}}_radio' value="{{labels[nr]}}" onclick="set_helios_value_{{id}}({{vals[nr]}})" data-mini="true">
-                /** <input data-mini="true" type='radio' id='{{rid}}_radio_{{nr}}' name='{{rid}}_radio' value="{{labels[nr]}}" onclick="io.write({{gad}}, {{vals[nr]}})"> **/
-                <label for='{{rid}}_radio_{{nr}}'>{{labels[nr]}}</label>
-            </span>
-        {% endfor %}
-    </span>
-    <script type="text/javascript">
-        function set_helios_value_{{id}}(newval) {
-            io.write('{{gad}}', newval);
-//          // alert('{{gad}}' + ' -> ' + newval);
-        }
-        $(document).delegate('span[data-widget="helios.radiobutton"]', { 
-            'update': function(event, response) {
-                if (response == $(this).attr('data-val')) {
-                    var targetbtn = $(this).attr('btn-id');
-                    $("input[name='{{rid}}_radio']:checked").removeProp("checked");
-                    $('#' + targetbtn).prop("checked",true);
-                    $('#' + targetbtn).click();
-                }
-            },
-        });
-    </script>
+
+
+
+/** {{ _self.vol_per_hr_chart('woops', 300, 50, 100, 150, 200, 127) }} **/
+{% macro vol_per_hr_chart(vmax, tick1, tick2, tick3, tick4, curr_value) %}
+
+	<div id="vol_per_hr_chart" class="vol_per_hr_chart" data-widget="helios.vol_per_hr_chart" data-vmax="{{vmax}}" data-tick1="{{tick1}}" data-tick2="{{tick2}}" data-tick3="{{tick3}}" data-tick4="{{tick4}}" data-item={{curr_value}}></div>
+
+	<script type="text/javascript">
+
+		$.widget("sv.helios_vol_per_hr_chart", $.sv.widget, {
+
+			initSelector: 'div[data-widget="helios.vol_per_hr_chart"]',
+
+			options: {
+				vmax: '',
+				tick1: '',
+				tick2: '',
+				tick3: '',
+				tick4: '',
+				curr_value: ''
+			},
+
+			allowPartialUpdate: true,
+
+			_create: function() {
+			
+				this._super();
+				
+				var vmin = 0;
+				var vmax = this.options.vmax;
+				var tick1 = this.options.tick1;
+				var tick2 = this.options.tick2;
+				var tick3 = this.options.tick3;
+				var tick4 = this.options.tick4;
+				var curr_value = this.options.curr_value;
+				
+				// ------------------
+				Highcharts.chart('vol_per_hr_chart', {
+
+					chart: {
+						type: 'gauge',
+						height: '53%',
+						margin: [-30, 15, 30, 15],
+						backgroundColor: 'transparent',
+						plotBackgroundColor: 'transparent',
+						plotBackgroundImage: null,
+						plotBorderWidth: 0,
+						plotShadow: false
+					},
+
+					title: '',
+
+					pane: {
+						startAngle: -90,
+						endAngle: 90,
+						background: null,
+								size: '140%',
+								center: ['50%', '96%']
+					},
+
+					plotOptions: {
+						gauge: {
+							dial: {
+								radius: '90%',
+								backgroundColor: '#d2d2d2',
+								borderWidth: 0,
+								baseWidth: 13,
+								topWidth: 0,
+								baseLength: '0%',
+								rearLength: '0%'
+							},
+							pivot: {
+								backgroundColor: '#d2d2d2',
+								radius: 6            		
+							}
+						}
+					},
+
+					// the value axis
+					yAxis: {
+						title: {
+							text: ''
+						},
+						lineWidth: 0,
+						tickPositions: [ tick1, tick2, tick3, tick4 ],
+						tickWidth: 0,
+						minorTicks: false,
+						labels: {
+								rotation: 'auto',
+							distance: 3,
+							style: {
+								color: 'white',
+								fontSize: '80%'
+							  }
+						},
+						
+						plotBands: [{
+							className: 'plotband-c1',
+							thickness: '60%',
+							from: vmin,
+							to: tick1
+						}, {
+							className: 'plotband-c2',
+							thickness: '60%',
+							from: tick1,
+							to: tick2
+						}, {
+							className: 'plotband-c3',
+							thickness: '60%',
+							from: tick2,
+							to: tick3
+						}, {
+							className: 'plotband-c4',
+							thickness: '60%',
+							from: tick3,
+							to: tick4
+						}, {
+							className: 'plotband-c5',
+							thickness: '60%',
+							from: tick4,
+							to: vmax
+						}]
+					},
+
+					series: [{
+						name: 'Aktuell',
+						data: [ curr_value ],
+						tooltip: {
+							valueSuffix: ' m³/h'
+						},
+						dataLabels: {
+								format: '{series.name}<br>{y} m³/h',
+								borderWidth: 0,
+							y: 10,
+							style: {
+								color: 'white',
+								fontWeight: 'normal'
+							}
+						}
+					}],
+
+					credits: {
+						enabled: false
+					}
+				})
+				
+			},
+			
+			_update: function(response) {
+
+				var chart = this.element.highcharts();
+				var tick1 = this.options.tick1;
+				chart.series[0].data[0].update(response, false);
+				chart.redraw();
+				// console.log("[helios.vol_per_hr_chart] '" + this.id + "' point: " + response);
+				// alert("[vol_per_hr_chart] '" + this.id + "': " + response);
+				// geht halbwegs: alert(tick1);
+			    
+			}
+
+
+
+		});
+			
+	</script>
+	
 {% endmacro %}
 
- 
-/**
-* Displays an item value if not 0 or empty
-* Useful for device alarm codes, count downs, timers (and probably more ...)
-* Optionally displays a specific string in case item is 0 or empty
-*
-* @param id        a unique id for this widget
-* @param gad       the gad/item
-* @param unit      optional unit, like 'min' or '\'' for remaining ' (minutes) in a count down
-* @param zerostr   optional string if item is 0 or empty (like ---). by default a white space &nbsp;
-*/
-{% macro value_notzero(id, gad, unit, zerostr) %}
-    <span id="{{ uid(page, id) }}" data-widget="helios.value_notzero" data-item="{{ gad }}" data-unit="{{ unit }}" data-zero-val="{{ zerostr|default('&#160;') }}">[text]</span>
-    <script type="text/javascript">
-        $(document).delegate('span[data-widget="helios.value_notzero"]', { 
-            'update': function(event, response) {
-                if (response !=0 && response !="") {
-                    $('#' + this.id).html(response + $(this).attr('data-unit'));
-                } else {
-                    $('#' + this.id).html($(this).attr('data-zero-val'));
-                }
-            },
-        });
-    </script>
-{% endmacro %}
+
+
 
 
 /**
@@ -683,20 +783,21 @@
 * @param link      optional link on click (use e.g. #mypopupname or http://www.mywebsite.com?args)
 */
 {% macro symbol_notzero(id, gad, img, hint, link) %}
-    <span id="{{ uid(page, id) }}" data-widget="helios.symbol_notzero" data-item="{{ gad }}">[symbol]</span>
-    <script type="text/javascript">
-        $(document).delegate('span[data-widget="helios.symbol_notzero"]', {
-            'update': function(event, response) {
-                head = ''; tail = '';
-                {% if link %} head = '<a class="ui-link" data-rel="popup" href="{{ link }}">'; tail = '</a>'; {% endif %}
-                img = '<img class="icon" src="{{ img }}" title="{{ hint }}">';
-                invis_img = '<img class="icon" src="{{ img }}" style="opacity:0">';
-                if (response !=0 && response !="") {
-                    $('#' + this.id).html(head + img + tail);
-                } else {
-                    $('#' + this.id).html(invis_img);
-                }       
-            },
-        });
-    </script>
+	<span id="{{ uid(page, id) }}" data-widget="helios.symbol_notzero" data-item="{{ gad }}">[symbol]</span>
+	<script type="text/javascript">
+		$(document).delegate('span[data-widget="helios.symbol_notzero"]', {
+			'update': function(event, response) {
+				head = ''; tail = '';
+				{% if link %} head = '<a class="ui-link" data-rel="popup" href="{{ link }}">'; tail = '</a>'; {% endif %}
+				img = '<img class="icon" src="{{ img }}" title="{{ hint }}">';
+				invis_img = '<img class="icon" src="{{ img }}" style="opacity:0">';
+				if (response !=0 && response !="") {
+					$('#' + this.id).html(head + img + tail);
+				} else {
+					$('#' + this.id).html(invis_img);
+				}		
+			},
+		});
+	</script>
 {% endmacro %}
+
