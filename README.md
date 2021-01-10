@@ -42,8 +42,8 @@ Restart smarthomeNG, the plugin should be running by now (check items in backend
 
 Troubleshooting options on github (see above).
 
-Get the Visu widget running
----------------------------
+Getting the Visu widget running
+-------------------------------
 Copy the files from sv_widgets to smartVISU/widgets and smartVISU/pics/helios (create this directory first). Then add following 2 lines to your HTML:
 
 <pre>
