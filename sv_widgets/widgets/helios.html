@@ -83,7 +83,7 @@
         'Stromverbrauch Ventilatoren':      'consumption_ventilators'
     } %}
     How to use it:
-    {% autoescape false %}  
+    {% autoescape true %}
         {% for title,item in info_popup_items %}
             <span class="helios_infotable">{{ title }}<span style="float:right;">{{ basic.print(id~'_info_'~item, 'ventilation.'~item ) }}</span></span>
         {% endfor %}
