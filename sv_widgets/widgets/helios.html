@@ -119,15 +119,12 @@
 
         
         /** Place temperatures on top the picture **/
-		<div class="helios_outside_temp"> {{ basic.print(id~'_outside_temp', 'ventilation.rs485._outside_temp', '%d °C', 'Math.round(VAR)') }}</div>
+	<div class="helios_outside_temp"> {{ basic.print(id~'_outside_temp', 'ventilation.rs485._outside_temp', '%d °C', 'Math.round(VAR)') }}</div>
         <div class="helios_inside_temp">  {{ basic.print(id~'_inside_temp',  'ventilation.rs485._inside_temp',  '%d °C', 'Math.round(VAR)') }}</div>
         <div class="helios_exhaust_temp"> {{ basic.print(id~'_exhaust_temp', 'ventilation.rs485._exhaust_temp', '%d °C', 'Math.round(VAR)') }}</div>
-        <div class="helios_incoming_temp">{{ basic.print(id~'_incoming_temp',
-		'ventilation.rs485._incoming_temp','%d °C', 'Math.round(VAR)') }}</div>
+        <div class="helios_incoming_temp">{{ basic.print(id~'_incoming_temp', 'ventilation.rs485._incoming_temp','%d °C', 'Math.round(VAR)') }}</div>
 
 
-
-        
         /** Place the level icon that triggers popup for level change (simulate a switch by using <a href>) **/
         /** basic.symbol will only place the 'active' icon from the loop - let's find out which is the right one: **/
         <div class="helios_level_icon">
