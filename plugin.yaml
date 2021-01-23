@@ -9,11 +9,12 @@ plugin:
     keywords: 'helios vallox ventilation'
     documentation: https://github.com/Tom-Bom-badil/helios/wiki
     support: https://knx-user-forum.de/forum/supportforen/smarthome-py/40092-erweiterung-helios-vallox-plugin
-    version: 1.4.2                 # Plugin version
-    sh_minversion: 1.1             # minimum shNG version to use this plugin
+    version: 1.5                   # Plugin version
+    sh_minversion: 1.7             # minimum shNG version to use this plugin
     multi_instance:  False         # plugin supports multi instance
     restartable: unknown
-    classname: 'Helios'            # class containing the plugin
+    classname: 'helios'            # class containing the plugin
+
 
 parameters:                        # Definition of parameters to be configured in etc/plugin.yaml
     tty:
@@ -24,7 +25,6 @@ parameters:                        # Definition of parameters to be configured i
             en: 'Port for communication'
 
     cycle:
-        # type: num
         type: int
         default: 60
         description:
@@ -37,16 +37,17 @@ item_attributes:
     helios_var:
         type: str
         description:
-            de: 'Keine Beschreibung angegeben. (Bitte in den Support Thread im SmatHomeNG Forum schauen)'
-            en: 'No description given (Please visit the support thread in the SmartHomeNG Forum)'
+            de: 'Variable des Plugins, die mit dem Item gekoppelt werden soll.'
+            en: 'Name of plugin variable to be linked with the item.'
 
 
 item_structs: NONE
-  # Definition of item-structure templates for this plugin
+# Definition of item-structure templates for this plugin
+
 
 plugin_functions: NONE
 # Definition of plugin functions defined by this plugin
 
+
 logic_parameters: NONE
 # Definition of logic parameters defined by this plugin
-
