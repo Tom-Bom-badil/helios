@@ -44,8 +44,8 @@ Fine tuning:
 
 Open smarthome/items/helios.yaml, look for the first section and adjust the specific data of your house (m², m³ etc) and your Helios/Vallox device (max air volume per hour, power levels etc). You will need to restart shNG once more to apply changes to this file.
 
-Getting the Visu widget running
--------------------------------
+Activating the smartVISU widget:
+--------------------------------
 Copy the following files found in smarthome/plugins/helios/files:
 
 <pre>
