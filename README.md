@@ -1,4 +1,4 @@
-# Helios ECx00Pro/Vallox xx SE Plugin for smarthomeNG
+# Helios ECx00 Pro/Vallox xx SE Plugin for smarthomeNG
 
 Detailed documentation can be found on the Wiki: https://github.com/Tom-Bom-badil/helios/wiki
 
