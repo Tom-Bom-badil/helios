@@ -62,7 +62,7 @@ The widget is now available within the sV. Now add following 2 lines to your HTM
 
 Meaning of the widget options:
 <pre>
-{{ helios.show_widget(id, use_uzsu, title) }}
+{% raw %}{{ helios.show_widget(id, use_uzsu, title) }}{% endraw %}
 id          unique id
 use_uzsu    display UZSU icon true / false
 title       optional title on top
