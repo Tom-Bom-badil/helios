@@ -28,12 +28,12 @@ Finally add the following lines to smarthome/etc/logic.yaml:
 
 <pre>
 fanspeed_uzsu_logic:
-    filename:   helios_logics.py
-    watch_item: ventilation.fanspeed.fanspeed_uzsu
+    filename: helios_logics.py
+    watch_item: ventilation.uzsu.fanspeed_uzsu
 
 booster_logic:
-    filename:   helios_logics.py 
-    watch_item: ventilation.booster_mode.logics.switch 
+    filename: helios_logics.py
+    watch_item: ventilation.booster_mode.logics.switch
 </pre>
 
 Restart smarthomeNG, the plugin should be running by now (check items for data in the Admin Interface --> Items --> Ventilation).
